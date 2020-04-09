@@ -46,7 +46,7 @@
       <div>
         <span>This is the example</span>
         <div id="test" style="margin-top: 25px; width: 100px; height: 50px; background: #04917a; transition: all 2s;"></div>
-        <div style="margin-top: 25px; width: 100%; height: 100px; background: #145885; padding: 1em;">
+        <div style="overflow-y: auto; margin-top: 25px; width: 100%; height: 100px; background: #145885; padding: 1em;">
           <center>
             <div id="loader" class="lds-ring" style="display: none;">
               <div></div><div></div><div></div><div></div>
@@ -54,6 +54,11 @@
             <div id="content" style="color: #fff; font-size: 1.2rem; font-weight: 500;">
               <span id="temp"></span>
               <span id="humidity"></span>
+            </div>
+            <div id="forecast" style="color: #fff; font-size: 1.2rem; font-weight: 500;">
+              <div>
+                <h3>Forecast</h3>
+              </div>
             </div>
           </center>
         </div>
@@ -81,22 +86,41 @@
           loaded = true;
           document.getElementById('loader').style.display = 'block';
           let weather = await getWeather();
+          let weatherForecastList = await getWeatherForecastList();
+
+          console.log(weatherForecastList);
 
           document.getElementById('loader').style.display = 'none';
-          document.getElementById('temp').innerHTML = `Temp: ${farenheitToCelcius(weather.main.temp)} ℃ `;
+          document.getElementById('temp').innerHTML = `Temp: ${kelvinToCelcius(weather.main.temp)} ℃ `;
           document.getElementById('humidity').innerHTML = `Humidity: ${weather.main.humidity}`;
+
+          weatherForecastList.list.map((weather) => {
+            let template =
+              `\
+                <div> \
+                  <span>Temp: ${kelvinToCelcius(weather.main.temp)} ℃ </span> \
+                  <span>Humidity: ${weather.main.humidity}</span> \
+                </div> \
+              `;
+
+            document.getElementById('forecast').innerHTML += template;
+          });
         }
       }
 
-      const farenheitToCelcius = (farenheit) => {
-        return ((farenheit - 32) * 5/9).toFixed(2);
+      const kelvinToCelcius = (kelvin) => {
+        return (kelvin - 273.15).toFixed(0);
       }
 
       const getWeather = async () => {
         let url = 'http://api.openweathermap.org/data/2.5/weather?id=1733045&appid=90aebe33f34dec8243c8c926884f7c15';
-
         let response = await fetch(url);
+        return response.json();
+      }
 
+      const getWeatherForecastList = async () => {
+        let url = 'http://api.openweathermap.org/data/2.5/forecast?id=1733045&appid=90aebe33f34dec8243c8c926884f7c15';
+        let response = await fetch(url);
         return response.json();
       }
     </script>
